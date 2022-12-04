@@ -31,7 +31,7 @@ spec:
           value: 10.43.18.36
         ports:
         - containerPort: 3000
-  replicas: 3
+  replicas: 4
 
 ---
 
