@@ -1,0 +1,78 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: db-faculdade
+  name: db-faculdade
+  namespace: projetofaculdade
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      name: "db-faculdade"
+      targetPort: 5432
+  selector:
+    app: db-faculdade
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-faculdade
+  namespace: projetofaculdade
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-faculdade
+  namespace: projetofaculdade
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: db-faculdade
+  template:
+    metadata:
+      labels:
+        app: db-faculdade
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:latest
+        env:
+        - name: POSTGRES_DB
+          value: gobuff_realworld_example_app_development
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        - name: WAIT_HOSTS
+          value: 10.43.18.36:5432
+        - name: DATABASE_HOST
+          value: 10.43.18.36
+        ports:
+        - containerPort: 5432
+          name: postegres
+        volumeMounts:
+        - name: postgresql-volume
+          mountPath: /var/lib/postegres
+      volumes:
+      - name: postgresql-volume
+        persistentVolumeClaim:
+          claimName: pvc-faculdade
+  replicas: 1
+  
+
+

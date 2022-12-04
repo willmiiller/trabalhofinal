@@ -1,0 +1,55 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-faculdade
+  namespace: projetofaculdade
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: api-faculdade
+  template:
+    metadata:
+      labels:
+        app: api-faculdade
+    spec:
+      containers:
+      - name: api-faculdade
+        image: ghcr.io/remast/gobuff_realworld_example_app/app:latest
+        env: 
+        - name: POSTGRES_DB
+          value: gobuff_realworld_example_app_development
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        - name: WAIT_HOSTS
+          value: 10.43.18.36:5432
+        - name: DATABASE_HOST
+          value: 10.43.18.36
+        ports:
+        - containerPort: 3000
+  replicas: 3
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: api-faculdade
+  name: api-faculdade
+  namespace: projetofaculdade
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 5001
+      targetPort: 3000
+      nodePort: 31001
+      name: "api-faculdade"
+  selector:
+    app: api-faculdade
+
